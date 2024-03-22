@@ -1,0 +1,62 @@
+import { Button, CheckBox, LineEdit, VerticalBox, HorizontalBox } from "std-widgets.slint";
+
+struct Task {
+    task: string,
+    status: bool,
+}
+
+export component AppWindow inherits Window {
+    in-out property<[Task]> tasks: [];
+    callback task-toggle(int);
+    callback add-task(string);
+    callback save-todo();
+    callback init-todo();
+
+    width: 720px;
+    height: 1280px;
+
+    VerticalBox {
+        for task[i] in tasks : CheckBox {
+            text: "\{task.task}";
+            checked: task.status;
+            toggled() => {
+                root.task-toggle(i);
+            }
+        }
+
+        HorizontalBox {
+            LineEdit {
+                font-size: 14px;
+                width: 265px;
+                height: 55px;
+                placeholder-text: "Enter Task Here";
+                accepted(text) => {
+                    root.add-task(text);
+                }
+            }
+        }
+
+        HorizontalBox {
+            Button {
+                width: 125px;
+                height: 55px;
+                text: "Save";
+                primary: true;
+                clicked => {
+                    root.save-todo();
+                }
+            }
+
+            Button {
+                width: 125px;
+                height: 55px;
+                text: "Load";
+                clicked => {
+                    root.init-todo();
+                }
+            }
+        }
+    }
+}
+
+
