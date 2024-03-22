@@ -17,7 +17,7 @@ Learning is a lifelong journey, and what better way to learn than by building ex
 Here's a list of projects included in this repository:
 
 1. **Todo App CLI**: A Rust-based cli todo app.
-2. **Todo App GUI**: A rust-based gui implementation of a todo app.
+2. **Todo App GUI**: A Rust-based gui implementation of a todo app.
 
 ...and many more to come!
 
