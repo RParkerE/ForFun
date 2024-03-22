@@ -18,6 +18,7 @@ Here's a list of projects included in this repository:
 
 1. **Todo App CLI**: A Rust-based cli todo app.
 2. **Todo App GUI**: A Rust-based gui implementation of a todo app.
+3. **Spellcheck in Rust**: A Rust-based spellchecker -> gets closest N words using Levenshtein Distance.
 
 ...and many more to come!
 
