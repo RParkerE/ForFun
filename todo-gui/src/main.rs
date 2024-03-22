@@ -2,7 +2,7 @@ slint::include_modules!();
 
 use std::io::Read;
 use std::str::FromStr;
-use slint::Model;
+use slint::{FilterModel, Model, SortModel};
 
 fn save(content: String) -> Result<(), std::io::Error> {
     std::fs::write("db.txt", content)
@@ -61,6 +61,28 @@ fn main() -> Result<(), slint::PlatformError> {
             tasks.extend([item]);
             let task_model = std::rc::Rc::new(slint::VecModel::from(tasks));
             ui.set_tasks(task_model.into());
+        }
+    });
+
+    ui.on_apply_sort_by_name({
+        let ui_handle = ui.as_weak();
+        move || {
+            let ui = ui_handle.unwrap();
+            ui.set_tasks(
+                std::rc::Rc::new(SortModel::new(ui.get_tasks(), |lhs, rhs| {
+                    lhs.task.to_lowercase().cmp(&rhs.task.to_lowercase())
+                })).into(),
+            );
+        }
+    });
+
+    ui.on_apply_hide_done({
+        let ui_handle = ui.as_weak();
+        move || {
+            let ui = ui_handle.unwrap();
+            ui.set_tasks(
+                std::rc::Rc::new(FilterModel::new(ui.get_tasks(), |e| !e.status)).into(),
+            );
         }
     });
 

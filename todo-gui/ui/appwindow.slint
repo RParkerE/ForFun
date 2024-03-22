@@ -11,11 +11,32 @@ export component AppWindow inherits Window {
     callback add-task(string);
     callback save-todo();
     callback init-todo();
+    callback apply_sort_by_name();
+    callback apply_hide_done();
 
     width: 720px;
     height: 1280px;
 
     VerticalBox {
+    	HorizontalBox{
+	    padding: 0px;
+	    alignment: start;
+
+	    CheckBox {
+	    	toggled => {
+		    root.apply_sort_by_name();
+		}
+		text: "Sort By Name";
+	    }
+
+	    CheckBox {
+	        toggled => {
+		    root.apply_hide_done();
+		}
+		text: "Hide Done Items";
+	    }
+	}
+
         for task[i] in tasks : CheckBox {
             text: "\{task.task}";
             checked: task.status;
@@ -25,19 +46,22 @@ export component AppWindow inherits Window {
         }
 
         HorizontalBox {
-            LineEdit {
+	    padding: 0px;
+            text-edit := LineEdit {
                 font-size: 14px;
                 width: 265px;
                 height: 55px;
                 placeholder-text: "Enter Task Here";
                 accepted(text) => {
                     root.add-task(text);
+		    self.text = "";
                 }
             }
         }
 
         HorizontalBox {
-            Button {
+            padding: 0px;
+            save-btn := Button {
                 width: 125px;
                 height: 55px;
                 text: "Save";
@@ -47,12 +71,13 @@ export component AppWindow inherits Window {
                 }
             }
 
-            Button {
+            load-btn := Button {
                 width: 125px;
                 height: 55px;
                 text: "Load";
                 clicked => {
                     root.init-todo();
+		    text-edit.text = "";
                 }
             }
         }
