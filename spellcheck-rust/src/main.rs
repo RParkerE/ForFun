@@ -1,7 +1,7 @@
 extern crate ndarray;
 
 use std::fs::File;
-use std::io::{BufRead, BufReader};
+use std::io::{stdin, stdout, BufRead, BufReader, Write};
 use ndarray::Array2;
 
 fn levenshtein_distance(token1: &str, token2: &str) -> i32 {
@@ -69,9 +69,18 @@ fn calc_dict_distance(word: &str, num_words: usize) -> Vec<String> {
 }
 
 fn main() {
-    let word = "hejlo";
+    let mut in_str = String::new();
+    println!("Enter a word: ");
+    let _ = stdout().flush();
+    stdin().read_line(&mut in_str).expect("No word was entered");
+    if let Some('\n') = in_str.chars().next_back() {
+        in_str.pop();
+    }
+    if let Some('\r') = in_str.chars().next_back() {
+        in_str.pop();
+    }
     let num_words = 5;
-    let closest_words = calc_dict_distance(word, num_words);
+    let closest_words = calc_dict_distance(&in_str, num_words);
     
     println!("{:?}", closest_words);
 }
