@@ -1,86 +1,153 @@
-extern crate ndarray;
+use std::cmp::min;
+use std::env::args;
+use std::fs::read_to_string;
+use std::collections::{HashMap, HashSet};
 
-use std::fs::File;
-use std::io::{stdin, stdout, BufRead, BufReader, Write};
-use ndarray::Array2;
-
-fn levenshtein_distance(token1: &str, token2: &str) -> i32 {
-    let len_token1 = token1.len();
-    let len_token2 = token2.len();
-
-    let mut distances = Array2::<i32>::zeros((len_token1 + 1, len_token2 + 1));
-
-    // Initialize first column
-    for t1 in 0..=len_token1 {
-        distances[[t1, 0]] = t1 as i32;
-    }
-
-    // Initialize first row
-    for t2 in 0..=len_token2 {
-        distances[[0, t2]] = t2 as i32;
-    }
-
-    for t1 in 1..=len_token1 {
-        for t2 in 1..=len_token2 {
-            let cost = if token1.chars().nth(t1 - 1) == token2.chars().nth(t2 - 1) {
-                0
-            } else {
-                1
-            };
-
-            let a = distances[[t1, t2 - 1]];
-            let b = distances[[t1 - 1, t2]];
-            let c = distances[[t1 - 1, t2 - 1]];
-
-            distances[[t1, t2]] = *[
-                a + 1,
-                b + 1,
-                c + cost
-            ].iter().min().unwrap();
-        }
-    }
-
-    distances[[len_token1, len_token2]]
+pub struct Dictionary {
+    data: HashSet<String>,
 }
 
-fn calc_dict_distance(word: &str, num_words: usize) -> Vec<String> {
+impl Dictionary {
+    pub fn new() -> Self {
+        let words = read_to_string("words.txt").expect("Failed to read file");
+        let mut dictionary: HashSet<String> = HashSet::new();
+        for word in words.lines() {
+            dictionary.insert(word.to_string());
+        }
+
+        Self { data: dictionary }
+    }
+
+    pub fn add(&mut self, word: String) {
+        self.data.insert(word);
+    }
+
+    pub fn to_vec(&self) -> Vec<&String> {
+        self.data.iter().collect()
+    }
+
+    pub fn get(&self, key: &str) -> Option<&String> {
+        self.data.get(key)
+    }
+}
+
+pub fn damerau_levenshtein(word: &str, target: &str) -> usize {
+    let (word_chars, target_chars): (Vec<char>, Vec<char>) = (word.chars().collect(), target.chars().collect());
+    let word_elems = word_chars.as_slice();
+    let target_elems = target_chars.as_slice();
+    let word_len = word_elems.len();
+    let target_len = target_elems.len();
+
+    if word_len == 0 {
+        return target_len;
+    }
+    if target_len == 0 {
+        return word_len;
+    }
+
+    let width = word_len + 2;
+    let mut distances = vec![0; (word_len + 2) * (target_len + 2)];
+    let max_distance = word_len + target_len;
+    distances[0] = max_distance;
+
+    for i in 0..(word_len + 1) {
+        distances[flat_index(i + 1, 0, width)] = max_distance;
+        distances[flat_index(i + 1, 1, width)] = i;
+    }
+
+    for j in 0..(target_len + 1) {
+        distances[flat_index(0, j + 1, width)] = max_distance;
+        distances[flat_index(1, j + 1, width)] = j;
+    }
+
+    let mut elems: HashMap<char, usize> = HashMap::with_capacity(64);
+
+    for i in 1..(word_len + 1) {
+        let mut db = 0;
+
+        for j in 1..(target_len + 1) {
+            let k = match elems.get(&target_elems[j - 1]) {
+                Some(&value) => value,
+                None => 0,
+            };
+
+            let insertion_cost = distances[flat_index(i, j + 1, width)] + 1;
+            let deletion_cost = distances[flat_index(i + 1, j, width)] + 1;
+            let transposition_cost =
+                distances[flat_index(k, db, width)] + (i - k - 1) + 1 + (j - db - 1);
+
+            let mut substitution_cost = distances[flat_index(i, j, width)] + 1;
+            if word_elems[i - 1] == target_elems[j - 1] {
+                db = j;
+                substitution_cost -= 1;
+            }
+
+            distances[flat_index(i + 1, j + 1, width)] = min(
+                substitution_cost,
+                min(insertion_cost, min(deletion_cost, transposition_cost)),
+            );
+        }
+
+        elems.insert(word_elems[i - 1].clone(), i);
+    }
+
+    distances[flat_index(word_len + 1, target_len + 1, width)]
+}
+
+fn flat_index(i: usize, j: usize, width: usize) -> usize {
+    j * width + i
+}
+
+pub fn calc_dict_distance(word: &str, num_words: usize, words: &Dictionary) -> Vec<(usize, String)> {
     let mut dict_word_dist = Vec::new();
     
-    if let Ok(file) = File::open("words.txt") {
-        let reader = BufReader::new(file);
-        
-        for line in reader.lines() {
-            if let Ok(line) = line {
-                let word_distance = levenshtein_distance(word, line.trim());
-                let word_distance = if word_distance >= 10 { 9 } else { word_distance };
-                dict_word_dist.push(format!("{}-{}", word_distance, line.trim()));
-            }
+    for dict_word in words.to_vec() {
+        let word_distance = damerau_levenshtein(word, dict_word);
+        if word_distance <= 3 {
+            dict_word_dist.push((word_distance, dict_word.to_string()));
         }
     }
     
-    dict_word_dist.sort();
+    dict_word_dist.sort_by_key(|&(dist, _)| dist);
     
-    let closest_words: Vec<String> = dict_word_dist.iter()
-        .take(num_words)
-        .map(|dist| dist.split('-').last().unwrap().to_string())
-        .collect();
-    
-    closest_words
+    dict_word_dist.into_iter().take(num_words).collect()
 }
 
 fn main() {
-    let mut in_str = String::new();
-    println!("Enter a word: ");
-    let _ = stdout().flush();
-    stdin().read_line(&mut in_str).expect("No word was entered");
-    if let Some('\n') = in_str.chars().next_back() {
-        in_str.pop();
+    let mut args = args();
+    args.next();
+    let filename = match args.next() {
+        Some(arg) => arg,
+        None => {
+            println!("Usage: suggest <filename>");
+            return;
+        }
+    };
+
+    let file_content = match read_to_string(&filename) {
+        Ok(content) => content,
+        Err(_) => {
+            println!("Failed to read file '{}'", filename);
+            return;
+        }
+    };
+
+    let num_words = 3;
+    let dictionary = Dictionary::new();
+    for word in file_content.split_whitespace() {
+        if word.chars().all(|c| c.is_alphabetic()) {
+            let word_cleaned = word.chars()
+                .filter(|c| c.is_alphabetic())
+                .map(|c| c.to_lowercase().to_string())
+                .collect::<String>();
+
+            if !dictionary.data.contains(&word_cleaned) {
+                let closest_words = calc_dict_distance(&word_cleaned, num_words, &dictionary);
+                println!("Word: {}", word);
+                for (_distance, suggestion) in closest_words {
+                    println!("Suggested Change: {} => {}", word, suggestion);
+                }
+            }
+        }
     }
-    if let Some('\r') = in_str.chars().next_back() {
-        in_str.pop();
-    }
-    let num_words = 5;
-    let closest_words = calc_dict_distance(&in_str, num_words);
-    
-    println!("{:?}", closest_words);
 }
