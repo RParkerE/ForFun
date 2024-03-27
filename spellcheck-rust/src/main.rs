@@ -8,8 +8,8 @@ pub struct Dictionary {
 }
 
 impl Dictionary {
-    pub fn new() -> Self {
-        let words = read_to_string("words.txt").expect("Failed to read file");
+    pub fn new(filename: &str) -> Self {
+        let words = read_to_string(filename).expect("Failed to read file");
         let mut dictionary: HashSet<String> = HashSet::new();
         for word in words.lines() {
             dictionary.insert(word.to_string());
@@ -119,9 +119,14 @@ fn main() {
     let filename = match args.next() {
         Some(arg) => arg,
         None => {
-            println!("Usage: suggest <filename>");
+            println!("Usage: suggest <filename> [dictionary]");
             return;
         }
+    };
+
+    let dictionary_filename = match args.next() {
+        Some(arg) => arg,
+        None => "words.txt".to_string(), // Default dictionary file
     };
 
     let file_content = match read_to_string(&filename) {
@@ -133,7 +138,7 @@ fn main() {
     };
 
     let num_words = 3;
-    let dictionary = Dictionary::new();
+    let dictionary = Dictionary::new(&dictionary_filename);
     for word in file_content.split_whitespace() {
         if word.chars().all(|c| c.is_alphabetic()) {
             let word_cleaned = word.chars()
