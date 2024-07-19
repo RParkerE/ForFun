@@ -20,6 +20,7 @@ Here's a list of projects included in this repository:
 2. **Todo App GUI**: A Rust-based gui implementation of a todo app.
 3. **Spellcheck in Rust**: A Rust-based spellchecker -> gets closest N words using Levenshtein Distance.
 4. **Raytracer in Haskell**: A Haskell based ray tracer
+5. **ASCII Rendering Engine in Zig**: A Zig pbased ascii rendering engine, with particle engine.
 
 ...and many more to come!
 
