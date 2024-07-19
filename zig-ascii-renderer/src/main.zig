@@ -67,6 +67,13 @@ const Particle = struct {
     pub fn update(self: *Particle) void {
         self.x += self.vx;
         self.y += self.vy;
+
+        // Wrap around screen boundaries
+        if (self.x < 0) self.x = @as(f32, @floatFromInt(SCREEN_WIDTH)) - 1;
+        if (self.x >= @as(f32, @floatFromInt(SCREEN_WIDTH))) self.x = 0;
+        if (self.y < 0) self.y = @as(f32, @floatFromInt(SCREEN_HEIGHT)) - 1;
+        if (self.y >= @as(f32, @floatFromInt(SCREEN_HEIGHT))) self.y = 0;
+
         self.lifetime -|= 1; // Saturating subtraction
     }
 };
@@ -129,13 +136,16 @@ pub fn main() !void {
 
     var frame: usize = 0;
     while (frame < 100) : (frame += 1) {
+        // Clear the screen
+        std.debug.print("\x1b[2J\x1b[H", .{});
+
         screen = Screen.init();
 
         try particle_system.emit(
             @as(f32, @floatFromInt(SCREEN_WIDTH)) / 2,
             @as(f32, @floatFromInt(SCREEN_HEIGHT)) / 2,
             '*',
-            Color.rgb(255, @as(u8, @intCast(frame * 2)), 0),
+            Color.rgb(255, @as(u8, (@intCast(frame * 6 % 256))), 0),
         );
 
         particle_system.update();
@@ -144,7 +154,5 @@ pub fn main() !void {
         screen.render();
 
         std.time.sleep(50 * std.time.ns_per_ms);
-
-        std.debug.print("\x1b[2J\x1b[H", .{});
     }
 }
