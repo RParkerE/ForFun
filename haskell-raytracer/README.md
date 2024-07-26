@@ -51,7 +51,7 @@ If you find that the high-resolution render takes too long, you can use just the
 1. Clone the repository:
     ```sh
     git clone https://github.com/yourusername/haskell-ray-tracer.git
-    cd haskell-ray-tracer
+    cd haskell-raytracer
     ```
 
 2. Build the project:
@@ -61,7 +61,7 @@ If you find that the high-resolution render takes too long, you can use just the
 
 3. Run the project:
     ```sh
-    stack exec ray-tracer
+    stack exec haskell-raytracer
     ```
 
 4. Run tests:

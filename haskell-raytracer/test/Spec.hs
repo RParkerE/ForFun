@@ -70,11 +70,11 @@ lowResCamera =
       samplesPerPixel = 10,
       maxDepth = 5,
       vFOV = 20,
-      lookFrom = Vec3 (-2) 2 1,
-      lookAt = Vec3 0 0 (-1),
+      lookFrom = Vec3 13 2 3,
+      lookAt = Vec3 0 0 0,
       vUp = Vec3 0 1 0,
-      defocusAngle = 10.0,
-      focusDist = 3.4
+      defocusAngle = 0.6,
+      focusDist = 10.0
     }
 
 hiResCamera :: Camera
@@ -85,11 +85,11 @@ hiResCamera =
       samplesPerPixel = 100,
       maxDepth = 50,
       vFOV = 20,
-      lookFrom = Vec3 (-2) 2 1,
-      lookAt = Vec3 0 0 (-1),
+      lookFrom = Vec3 13 2 3,
+      lookAt = Vec3 0 0 0,
       vUp = Vec3 0 1 0,
-      defocusAngle = 10.0,
-      focusDist = 3.4
+      defocusAngle = 0.6,
+      focusDist = 10.0
     }
 
 thetaCamera :: Camera
@@ -100,11 +100,11 @@ thetaCamera =
       samplesPerPixel = 10,
       maxDepth = 5,
       vFOV = 20,
-      lookFrom = Vec3 4 (-6) 3,
-      lookAt = Vec3 0 0 (-1),
+      lookFrom = Vec3 22 6 8,
+      lookAt = Vec3 1 0 (-1),
       vUp = Vec3 0 1 0,
-      defocusAngle = 10.0,
-      focusDist = 3.4
+      defocusAngle = 0.6,
+      focusDist = 10.0
     }
 
 renderScene :: String -> HittableList -> Camera -> IO ()
