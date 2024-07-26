@@ -72,7 +72,7 @@ rayColor cam r depth world
 -- Calculate the "hidden"/"derived" parameters and return a fully initialized Camera
 initialize :: Camera -> Camera
 initialize cam =
-  let height = max (round (fromIntegral (imageW cam) / (aspectRatio cam))) 1 :: Int
+  let height = max (floor (fromIntegral (imageW cam) / (aspectRatio cam))) 1 :: Int
 
       pSS = 1.0 / fromIntegral (samplesPerPixel cam)
       center = lookFrom cam
