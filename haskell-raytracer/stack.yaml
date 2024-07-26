@@ -1,0 +1,11 @@
+resolver: lts-21.25  
+
+packages:
+- .
+
+extra-deps: 
+- random-1.2.1.1
+
+flags: {}
+
+extra-package-dbs: []
