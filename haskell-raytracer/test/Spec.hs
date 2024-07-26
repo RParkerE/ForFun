@@ -81,7 +81,7 @@ hiResCamera :: Camera
 hiResCamera =
   Camera
     { aspectRatio = 16.0 / 9.0,
-      imageW = 400,
+      imageW = 1200,
       samplesPerPixel = 100,
       maxDepth = 50,
       vFOV = 20,
