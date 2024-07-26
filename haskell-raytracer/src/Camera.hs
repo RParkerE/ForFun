@@ -22,6 +22,11 @@ import Vec3 (scalarDiv, scalarMult, unitVector, vecLength)
 import VectorConstants
 import VectorConstants (degreesToRadians)
 
+-- Camera Data Structure and parameters needed for rendering
+-- Only need to pass aspectRatio, imageW, samplesPerPixel, maxDepth,
+-- vFOV, lookFrom, lookAt, defocusAngle, focusDist.
+-- The rest of the parameters will be calculated and a fully
+-- initialized camera is returned on initialize call
 data Camera = Camera
   { aspectRatio :: Double,
     imageW :: Int,
@@ -44,7 +49,7 @@ data Camera = Camera
   }
   deriving (Show, Eq)
 
--- Simulate Ray of Particular wavelength
+-- Calculate the color of a ray as it interacts with the world
 rayColor :: Camera -> Ray -> Int -> HittableList -> IO Color
 rayColor cam r depth world
   | depth <= 0 = return $ Vec3 0 0 0
@@ -64,7 +69,7 @@ rayColor cam r depth world
               t = 0.5 * (y unitDirection + 1.0)
           return $ scalarMult (Vec3 1.0 1.0 1.0) (1.0 - t) + scalarMult (Vec3 0.5 0.7 1.0) t
 
--- Initialize the camera and its parameters
+-- Calculate the "hidden"/"derived" parameters and return a fully initialized Camera
 initialize :: Camera -> Camera
 initialize cam =
   let height = max (round (fromIntegral (imageW cam) / (aspectRatio cam))) 1 :: Int
@@ -95,6 +100,7 @@ initialize cam =
       defocusDV = scalarMult v defocusRad
    in cam {imageH = height, cameraCenter = center, pixelDeltaU = pDU, pixelDeltaV = pDV, pixel00Loc = initLoc, pixelSampleScale = pSS, defocusDiskU = defocusDU, defocusDiskV = defocusDV}
 
+-- Generate a Ray for a given pixel
 getRay :: Camera -> Int -> Int -> IO Ray
 getRay cam i j = do
   offset <- sampleSquare
@@ -104,12 +110,14 @@ getRay cam i j = do
       rayDirection = pixelSample - rayOrigin
   return $ Ray rayOrigin rayDirection
 
+-- Generate random points within a unit square
 sampleSquare :: IO Vec3
 sampleSquare = do
   x <- randomDoubleRange (-0.5) 0.5
   y <- randomDoubleRange (-0.5) 0.5
   return $ Vec3 x y 0
 
+-- Generate a random point on a unit disk (defocus disk)
 defocusDiskSample :: Camera -> IO Point3
 defocusDiskSample cam = do
   p <- randomInUnitDisk

@@ -23,11 +23,14 @@ data HittableObject = forall h. (Hittable h) => HittableObject h
 instance Hittable HittableObject where
   hit (HittableObject h) = hit h
 
+-- List of Hittable data structures which represents the 'world'
 data HittableList = HittableList {objects :: [HittableObject]}
 
+-- Clear all instances from the list
 clearHittableList :: HittableList -> HittableList
 clearHittableList _ = HittableList []
 
+-- Add a Hittable instance to the list
 addToHittableList :: HittableList -> HittableObject -> HittableList
 addToHittableList (HittableList objs) obj = HittableList (obj : objs)
 

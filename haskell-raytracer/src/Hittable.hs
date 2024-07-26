@@ -23,8 +23,10 @@ import Vec3
 import Vec3 (unitVector)
 import VectorConstants (randomDouble)
 
+-- Record of a ray-object instersection
 data HitRecord = HitRecord {p :: Point3, normal :: Vec3, mat :: Material, t :: Double, frontFace :: Bool}
 
+-- Set the normal vector for a HitRecord based on the Ray's direction
 setFaceNormal :: HitRecord -> Ray -> Vec3 -> HitRecord
 setFaceNormal h r outwardNormal =
   let ff = dot (direction r) outwardNormal < 0
@@ -35,6 +37,7 @@ setFaceNormal h r outwardNormal =
 class Hittable h where
   hit :: h -> Ray -> Interval -> HitRecord -> IO (Maybe HitRecord)
 
+-- Another TypeClass which defines how a Ray scatters
 class Materials m where
   scatter :: m -> Ray -> HitRecord -> IO (Maybe (Ray, Color))
 
